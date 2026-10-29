@@ -22,12 +22,6 @@
         <Reference Include="BepInEx">
             <HintPath>$(SPTPath)\BepInEx\core\BepInEx.dll</HintPath>
         </Reference>
-        <Reference Include="Comfort">
-            <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\Comfort.dll</HintPath>
-        </Reference>
-        <Reference Include="Sirenix.Serialization">
-            <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\Sirenix.Serialization.dll</HintPath>
-        </Reference>
         <Reference Include="spt-common">
             <HintPath>$(SPTPath)\BepInEx\plugins\spt\spt-common.dll</HintPath>
         </Reference>
@@ -39,9 +33,6 @@
         </Reference>
         <Reference Include="UnityEngine.CoreModule">
             <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
-        </Reference>
-        <Reference Include="UnityEngine.InputLegacyModule">
-            <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
         </Reference>
     </ItemGroup>
 
