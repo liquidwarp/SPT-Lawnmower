@@ -1,80 +1,42 @@
 # Lawnmower
 
-> 
+Client-side SPT mod by hazelify, version 1.0.0. Licensed under the MIT license.
 
-**Author:** hazelify  
-**Version:** 1.0.0  
-**SPT Version:** 4.1.6  
-**License:** MIT
+Lawnmower disables the terrain-detail GPU instancers found at raid start. Press **F10** to toggle it during a raid, or use the BepInEx configuration manager. It skips the hideout. The game can fall back to ordinary terrain-detail rendering; grass rendered through separate prefab managers is unaffected.
 
----
+## Configuration
 
-## What This Mod Does
+Settings are stored in `BepInEx/config/hazelify.Lawnmower.cfg`:
 
-Describe what your mod does here.
-
-This template includes BepInEx Configuration examples. All settings are editable in-game via the **F12** config manager or by editing the config file at `BepInEx/config/hazelify.Lawnmower.cfg`.
-
-### Included Config Entries
-
-| Setting | Type | Default | Description |
-|---|---|---|---|
-| Enable Mod | `bool` | `true` | Enables or disables the mod |
-| Example Integer | `int` | `5` | Integer with slider (0–100) |
-| Example Float | `float` | `1.0` | Float with slider (0–10) |
-| Example String | `string` | `Hello SPT` | Simple string setting |
-| Enum Selection | `enum` | `OptionA` | Dropdown selection |
-| Action Key | `KeyboardShortcut` | `F10` | Remappable keybind |
-| Overlay Color | `Color` | `red` | Color picker |
-
----
-
-## Requirements
-
-- [SPT](https://sp-mod.com/) 4.1.2 or later 4.1.x installed (BepInEx is included)
-- .NET SDK (`netstandard2.1`-compatible) for building from source
-
----
+| Setting | Default | Purpose |
+| --- | --- | --- |
+| Enable the mod | `true` | Toggle the terrain-detail managers during a raid. |
+| Master switch hotkey | `F10` | Keyboard shortcut for the toggle. |
 
 ## Building
 
-```sh
-cd Lawnmower
-dotnet build -c Release
+Requires the .NET SDK with support for `.slnx` solutions and an SPT 4.1 installation. References are read from the installation rather than bundled in this repository.
+
+```powershell
+./build.ps1
+./build.ps1 -SPTPath 'E:\Games\SPT\4.1' -Configuration Debug
+./build.ps1 -PackageRelease
 ```
 
-The PostBuild target automatically copies the compiled DLL to your SPT installation's `BepInEx\plugins\` folder.
-The project also packages the mod into a distributable `Lawnmower.zip` ready to be uploaded.
+The default build uses `E:\Games\SPT\4.1` and Release configuration. The DLL is written to `bin/Release/netstandard2.1/hazelify-Lawnmower.dll`. Building does not install the mod.
 
----
+`-PackageRelease` creates `releases/hazelify-Lawnmower-1.0.0.zip` with the `BepInEx/plugins` directory layout.
 
-## Installation
+The build script also supports explicit `-InstallMod` and `-InstallMod -HotReload`, following the other mods' build convention. These options write to the selected SPT installation. Hot reload installs the DLL and symbols into `BepInEx/scripts`; normal installation uses `BepInEx/plugins`.
 
-1. Build the project (see above) **or** download the latest release DLL.
-2. Copy `Lawnmower.dll` to `<SPT install>\BepInEx\plugins\`.
-3. Launch SPT as usual.
-4. Press **F12** in-game to open the config manager and adjust settings.
+When replacing an older installation, remove its `Lawnmower.dll` before installing `hazelify-Lawnmower.dll`. The plugin GUID and configuration keys are unchanged.
 
----
+## Source layout
 
-## Project Structure
-
-```
-Lawnmower/
-├── Lawnmower.csproj   ← project file with DLL references
-├── Plugin.cs              ← BepInEx plugin with config entries
-├── README.md
-└── .gitignore
-```
-
----
-
-## Learning Resources
-
-| Resource | URL |
-|---|---|
-| BepInEx Configuration Docs | https://github.com/BepInEx/BepInEx.ConfigurationManager/blob/master/README.md|
-| SPT Client Mod Migration (4.1) | https://wiki.sp-tushonka.com/en/modding/SPT_41_Modding/Client_40_to_41 |
-| SPT Wiki Modding Resources | https://wiki.sp-tushonka.com/en/modding/Modding_Resources |
-
----
+- `Plugin.cs`: plugin initialization, configuration, and hotkey.
+- `Patches/RaidStartedPatch.cs`: raid-start hook.
+- `Grass/Loader.cs`: raid validation and component setup.
+- `Grass/Lawnmower.cs`: terrain-detail discovery and toggling.
+- `Directory.Build.props`: mod metadata and output naming.
+- `Directory.Build.targets`: generated metadata, optional installation, and release staging.
+- `Directory.Solution.props` / `Directory.Solution.targets`: solution metadata and release ZIP packaging.

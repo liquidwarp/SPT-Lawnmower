@@ -1,0 +1,56 @@
+<Project>
+
+    <Target Name="GenerateMyModInfo" BeforeTargets="CoreCompile">
+        <PropertyGroup>
+            <MyModInfoFile>$(IntermediateOutputPath)MyModInfo.g.cs</MyModInfoFile>
+            <MyModInfoText><![CDATA[
+namespace $(RootNamespace)%3B
+
+internal static class MyModInfo
+{
+    public const string MOD_GUID = "$(ModGuid)"%3B
+    public const string MOD_NAME = "$(Product)"%3B
+    public const string MOD_AUTHOR = "$(Authors)"%3B
+    public const string MOD_VERSION = "$(Version)"%3B
+    public const string CLIENT_SPT_VERSION = "$(ClientSPTVersion)"%3B
+}
+]]></MyModInfoText>
+        </PropertyGroup>
+        <WriteLinesToFile File="$(MyModInfoFile)" Lines="$(MyModInfoText)" Overwrite="true" WriteOnlyWhenDifferent="true" />
+        <ItemGroup>
+            <Compile Include="$(MyModInfoFile)" />
+            <FileWrites Include="$(MyModInfoFile)" />
+        </ItemGroup>
+    </Target>
+
+    <Target Name="InstallMod" AfterTargets="PostBuildEvent" Condition="'$(InstallMod)' == 'True'">
+        <PropertyGroup>
+            <PluginsDir>$(SPTPath)\$(ModDir)</PluginsDir>
+            <ScriptsDir>$(SPTPath)\BepInEx\scripts</ScriptsDir>
+            <InstallDir>$(PluginsDir)</InstallDir>
+            <StaleInstallDir>$(ScriptsDir)</StaleInstallDir>
+            <InstallDir Condition="'$(HotReload)' == 'True'">$(ScriptsDir)</InstallDir>
+            <StaleInstallDir Condition="'$(HotReload)' == 'True'">$(PluginsDir)</StaleInstallDir>
+        </PropertyGroup>
+        <ItemGroup>
+            <InstallFiles Include="$(TargetPath)" />
+            <InstallFiles Include="$(TargetDir)$(TargetName).pdb" Condition="'$(HotReload)' == 'True'" />
+            <StaleFiles Include="$(StaleInstallDir)\$(TargetFileName);$(StaleInstallDir)\$(TargetName).pdb" />
+            <StaleFiles Remove="@(StaleFiles)" Condition="!Exists('%(FullPath)')" />
+        </ItemGroup>
+        <Error Condition="'$(HotReload)' == 'True' and !Exists('$(TargetDir)$(TargetName).pdb')" Text="Hot reload needs $(TargetName).pdb next to the DLL" />
+        <Delete Files="@(StaleFiles)" />
+        <Message Importance="High" Condition="'@(StaleFiles)' != ''" Text="$(MSBuildProjectName) removed from @(StaleFiles->'%(FullPath)')" />
+        <Copy SourceFiles="@(InstallFiles)" DestinationFolder="$(InstallDir)">
+            <Output TaskParameter="CopiedFiles" ItemName="InstalledFiles" />
+        </Copy>
+        <Message Importance="High" Text="$(MSBuildProjectName) installed to @(InstalledFiles->'%(FullPath)')" />
+    </Target>
+
+    <Target Name="PackageRelease" AfterTargets="Build" Condition="'$(PackageRelease)' == 'True'">
+        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ReleaseDir)\$(ModDir)">
+            <Output TaskParameter="CopiedFiles" ItemName="PackagedFiles" />
+        </Copy>
+        <Message Importance="High" Text="$(MSBuildProjectName) packaged to @(PackagedFiles->'%(FullPath)')" />
+    </Target>
+</Project>
